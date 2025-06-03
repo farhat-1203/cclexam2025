@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8081:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: test123           # same as MYSQL_ROOT_PASSWORD in db
+      DB_NAME: notes                 # same as MYSQL_DATABASE in db
+    networks:
+      - recdbnw
+    restart: always
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: test123
+      MYSQL_DATABASE: notes
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - recdbnw
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  recdbnw:
+
+volumes:
+  mysql_data:
+ 
